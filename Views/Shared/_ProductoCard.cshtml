@@ -1,0 +1,33 @@
+@model PlayerasJyC.Models.Producto
+
+<div class="product-card">
+    <a asp-controller="Productos" asp-action="Detalle" asp-route-id="@Model.ProductoId" class="card-link">
+        <div class="card-img-wrap">
+            <img src="@Model.Imagen" alt="@Model.Nombre" />
+            @if (Model.EnOferta && Model.PrecioOferta.HasValue)
+            {
+                <span class="badge">Oferta</span>
+            }
+        </div>
+        <div class="card-body">
+            <div class="cat-chip">@(Model.Categoria?.Nombre)</div>
+            <h3 class="card-title">@Model.Nombre</h3>
+            <p class="desc">@(Model.Descripcion != null && Model.Descripcion.Length > 70 ? Model.Descripcion.Substring(0, 70) + "..." : Model.Descripcion)</p>
+            <div>
+                @if (Model.EnOferta && Model.PrecioOferta.HasValue)
+                {
+                    <span class="price-old">$@Model.PrecioOriginal.ToString("N2")</span>
+                }
+                <span class="card-price">$@Model.PrecioActual.ToString("N2")</span>
+            </div>
+            @if (Model.StockTotal == 0)
+            {
+                <div class="stock-out">Agotado</div>
+            }
+            else if (Model.StockTotal <= 10)
+            {
+                <div class="stock-low">¡Últimas piezas!</div>
+            }
+        </div>
+    </a>
+</div>

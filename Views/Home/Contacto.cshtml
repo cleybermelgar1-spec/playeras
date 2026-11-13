@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Contáctanos";
+}
+
+<div class="page">
+    <h2>Cotiza tu playera</h2>
+
+    @if (ViewBag.Mensaje != null)
+    {
+        <div class="alert-msg ok" style="margin-left:0">@ViewBag.Mensaje</div>
+    }
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert-msg err" style="margin-left:0">@ViewBag.Error</div>
+    }
+
+    <form asp-action="Contacto" method="post" class="form-card" style="margin-top:16px">
+        <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" name="nombre" maxlength="100" placeholder="Tu nombre" required />
+        </div>
+        <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" name="email" maxlength="100" placeholder="correo@ejemplo.com" required />
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Nombre o estilo de playera</label>
+                <input type="text" name="playera" maxlength="100" placeholder="Ej. Playera Oversize" required />
+            </div>
+            <div class="form-group">
+                <label>Talla</label>
+                <select name="talla" required>
+                    <option value="S">Chica (S)</option>
+                    <option value="M">Mediana (M)</option>
+                    <option value="L">Grande (L)</option>
+                    <option value="XL">Extra Grande (XL)</option>
+                    <option value="XXL">Doble Extra Grande (XXL)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Detalles adicionales</label>
+            <textarea name="detalles" maxlength="500" placeholder="Color, diseño personalizado, etc."></textarea>
+        </div>
+        <button type="submit" class="btn-action btn-block">Enviar solicitud</button>
+    </form>
+</div>

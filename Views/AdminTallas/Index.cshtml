@@ -1,0 +1,42 @@
+@model IEnumerable<PlayerasJyC.Models.Talla>
+
+@{
+    ViewData["Title"] = "Admin: Tallas";
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Tallas</h2>
+        <div class="acciones">
+            <a asp-action="Crear" class="btn-sm rosa">+ Nuevo</a>
+            <a asp-controller="Admin" asp-action="Index" class="btn-sm gris">Volver al panel</a>
+        </div>
+    </div>
+
+    <div class="tabla-wrap">
+        <table class="tabla">
+            <thead><tr><th>Talla</th><th>Orden</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.Orden</td>
+                    <td>
+                        <div class="acciones">
+                            <a asp-action="Editar" asp-route-id="@item.TallaId" class="btn-sm">Editar</a>
+                            <form asp-action="Eliminar" asp-route-id="@item.TallaId" method="post" onsubmit="return confirm('¿Eliminar este registro?');">
+                                <button type="submit" class="btn-sm rojo">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="muted" style="margin-top:12px">Aún no hay registros. Usa el botón "+ Nuevo".</p>
+    }
+</div>

@@ -1,0 +1,41 @@
+@model List<PlayerasJyC.Models.Resena>
+
+@{
+    ViewData["Title"] = "Admin: Reseñas";
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Reseñas</h2>
+        <a asp-controller="Admin" asp-action="Index" class="btn-sm gris">Volver al panel</a>
+    </div>
+
+    <div class="tabla-wrap">
+        <table class="tabla">
+            <thead><tr><th>Fecha</th><th>Producto</th><th>Cliente</th><th>Calificación</th><th>Comentario</th><th>Visible</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Fecha.ToString("dd/MM/yyyy")</td>
+                    <td>@r.Producto.Nombre</td>
+                    <td>@r.Usuario.Nombre</td>
+                    <td><span class="estrellas">@(new string('★', r.Calificacion) + new string('☆', 5 - r.Calificacion))</span></td>
+                    <td>@r.Comentario</td>
+                    <td>@(r.Visible ? "Sí" : "No")</td>
+                    <td>
+                        <div class="acciones">
+                            <form asp-action="Alternar" asp-route-id="@r.ResenaId" method="post"><button type="submit" class="btn-sm">@(r.Visible ? "Ocultar" : "Mostrar")</button></form>
+                            <form asp-action="Eliminar" asp-route-id="@r.ResenaId" method="post" onsubmit="return confirm('¿Eliminar esta reseña?');"><button type="submit" class="btn-sm rojo">Eliminar</button></form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="muted" style="margin-top:12px">Aún no hay reseñas.</p>
+    }
+</div>

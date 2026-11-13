@@ -1,0 +1,84 @@
+@model PlayerasJyC.Models.Producto
+
+@{
+    bool esNuevo = Model.ProductoId == 0;
+    ViewData["Title"] = esNuevo ? "Nuevo producto" : "Editar producto";
+}
+
+<div class="page">
+    <h2>@(esNuevo ? "Nuevo producto" : "Editar producto")</h2>
+
+    <form asp-action="@(esNuevo ? "Crear" : "Editar")" asp-route-id="@Model.ProductoId" method="post" enctype="multipart/form-data" class="form-card">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-msg err">
+                @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@e.ErrorMessage</div>
+                }
+            </div>
+        }
+        <input type="hidden" asp-for="ProductoId" />
+        <input type="hidden" asp-for="FechaAlta" />
+
+        <div class="form-group">
+            <label>Nombre</label>
+            <input asp-for="Nombre" maxlength="100" />
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Categoría</label>
+                <select asp-for="CategoriaId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Categorias"></select>
+            </div>
+            <div class="form-group">
+                <label>Colección</label>
+                <select asp-for="ColeccionId" asp-items="(IEnumerable<SelectListItem>)ViewBag.Colecciones">
+                    <option value="">(Sin colección)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Descripción</label>
+            <textarea asp-for="Descripcion"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Material</label>
+            <input asp-for="Material" maxlength="100" placeholder="Ej. 100% algodón peinado" />
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Precio ($)</label>
+                <input asp-for="PrecioOriginal" type="number" step="0.01" min="0" />
+            </div>
+            <div class="form-group">
+                <label>Precio de oferta ($)</label>
+                <input asp-for="PrecioOferta" type="number" step="0.01" min="0" />
+            </div>
+        </div>
+        <div class="form-group form-check">
+            <input asp-for="EnOferta" type="checkbox" /> <label>Producto en oferta</label>
+        </div>
+
+        <div class="form-group">
+            <label>Imagen principal (subir archivo)</label>
+            <input type="file" name="archivo" accept=".jpg,.jpeg,.png,.webp,.gif" />
+        </div>
+        <div class="form-group">
+            <label>…o dirección de la imagen</label>
+            <input asp-for="ImagenUrl" maxlength="300" placeholder="/images/productos/p1.svg" />
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.ImagenUrl))
+        {
+            <p><img class="mini" style="width:90px;height:90px" src="@Model.ImagenUrl" alt="Imagen actual" /></p>
+        }
+
+        <div class="form-group form-check">
+            <input asp-for="Activo" type="checkbox" /> <label>Visible en la tienda</label>
+        </div>
+
+        <div class="acciones" style="margin-top:14px">
+            <button type="submit" class="btn-action">Guardar</button>
+            <a asp-action="Index" class="btn-sm gris">Cancelar</a>
+        </div>
+    </form>
+</div>

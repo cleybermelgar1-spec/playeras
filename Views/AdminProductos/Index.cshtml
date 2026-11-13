@@ -1,0 +1,54 @@
+@model List<PlayerasJyC.Models.Producto>
+
+@{
+    ViewData["Title"] = "Admin: Productos";
+    string? q = ViewBag.Q;
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Productos</h2>
+        <div class="acciones">
+            <a asp-action="Crear" class="btn-sm rosa">+ Nuevo producto</a>
+            <a asp-controller="Admin" asp-action="Index" class="btn-sm gris">Volver al panel</a>
+        </div>
+    </div>
+
+    <form method="get" asp-action="Index" class="acciones" style="margin-bottom:14px">
+        <input type="text" name="q" value="@q" placeholder="Buscar por nombre" class="input-neon" style="max-width:280px" />
+        <button type="submit" class="btn-sm">Buscar</button>
+    </form>
+
+    <div class="tabla-wrap">
+        <table class="tabla">
+            <thead><tr><th></th><th>Nombre</th><th>Categoría</th><th class="num">Precio</th><th class="num">Stock</th><th>Activo</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td><img class="mini" src="@p.Imagen" alt="@p.Nombre" /></td>
+                    <td><b>@p.Nombre</b>@(p.EnOferta ? Html.Raw(" <span class=\"badge\">Oferta</span>") : null)</td>
+                    <td>@p.Categoria.Nombre</td>
+                    <td class="num">$@p.PrecioActual.ToString("N2")</td>
+                    <td class="num">@p.StockTotal</td>
+                    <td>@(p.Activo ? "Sí" : "No")</td>
+                    <td>
+                        <div class="acciones">
+                            <a asp-action="Editar" asp-route-id="@p.ProductoId" class="btn-sm">Editar</a>
+                            <a asp-action="Variantes" asp-route-id="@p.ProductoId" class="btn-sm">Tallas y stock</a>
+                            <a asp-action="Imagenes" asp-route-id="@p.ProductoId" class="btn-sm">Imágenes</a>
+                            <form asp-action="Eliminar" asp-route-id="@p.ProductoId" method="post" onsubmit="return confirm('¿Eliminar este producto?');">
+                                <button type="submit" class="btn-sm rojo">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="muted" style="margin-top:12px">No hay productos que coincidan.</p>
+    }
+</div>

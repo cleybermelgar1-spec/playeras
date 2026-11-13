@@ -1,0 +1,92 @@
+@model PlayerasJyC.Models.Pedido
+
+@{
+    ViewData["Title"] = "Ticket " + Model.Folio;
+    string volverCtrl = (string?)ViewBag.VolverController ?? "Pedidos";
+    string volverAct = (string?)ViewBag.VolverAction ?? "Detalle";
+    bool puedeEnviar = ViewBag.PuedeEnviar == true;
+    decimal pagado = Model.Pagos.Where(p => p.EstadoPago == "Aprobado").Sum(p => p.Monto);
+}
+
+<div class="page">
+    <div class="ticket">
+        <h1>PLAYERAS <span>JyC</span></h1>
+        <p class="muted">Comprobante de compra</p>
+
+        <div class="meta">
+            <div><b>Folio:</b> @Model.Folio</div>
+            <div><b>Fecha:</b> @Model.FechaHora.ToString("dd/MM/yyyy HH:mm")</div>
+            <div><b>Cliente:</b> @Model.Usuario.Nombre</div>
+            <div><b>Correo:</b> @Model.Usuario.Email</div>
+            <div><b>Estado del pedido:</b> @Model.EstadoPedido</div>
+            <div><b>Método de pago:</b> @Model.MetodoPago</div>
+            <div style="grid-column:1/-1"><b>Enviar a:</b> @Model.NombreDestinatario — @Model.DireccionEnvio, @Model.Ciudad C.P. @Model.CodigoPostal</div>
+            <div><b>Envío:</b> @(Model.MetodoEnvio?.Nombre ?? "—")</div>
+        </div>
+
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead><tr><th>Producto</th><th>Talla / Color</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Importe</th></tr></thead>
+                <tbody>
+                @foreach (var d in Model.Detalles)
+                {
+                    <tr>
+                        <td>@d.NombreProducto</td>
+                        <td>@d.Talla / @d.Color</td>
+                        <td class="num">@d.Cantidad</td>
+                        <td class="num">$@d.PrecioUnitario.ToString("N2")</td>
+                        <td class="num">$@((d.Cantidad * d.PrecioUnitario).ToString("N2"))</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="totales">
+            <div>Subtotal: $@Model.Subtotal.ToString("N2")</div>
+            @if (Model.Descuento > 0)
+            {
+                <div>Descuento @(Model.Cupon != null ? "(" + Model.Cupon.Codigo + ")" : ""): -$@Model.Descuento.ToString("N2")</div>
+            }
+            <div>Envío: $@Model.CostosEnvio.ToString("N2")</div>
+            <div class="gran">Total: $@Model.Total.ToString("N2") MXN</div>
+        </div>
+
+        <h3>Pagos</h3>
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead><tr><th>Fecha</th><th>Método</th><th>Referencia</th><th class="num">Monto</th><th>Estado</th></tr></thead>
+                <tbody>
+                @foreach (var pg in Model.Pagos)
+                {
+                    <tr>
+                        <td>@pg.FechaPago.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@pg.MetodoPago</td>
+                        <td>@pg.Referencia</td>
+                        <td class="num">$@pg.Monto.ToString("N2")</td>
+                        <td>@pg.EstadoPago</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top:10px"><b>Total pagado: $@pagado.ToString("N2")</b></p>
+        <p class="muted" style="margin-top:14px">Gracias por tu compra en Playeras JyC. Conserva este comprobante.</p>
+    </div>
+
+    <div class="acciones no-print" style="max-width:720px;margin:16px auto 0">
+        <button type="button" class="btn-sm rosa" onclick="window.print()">Imprimir / Guardar PDF</button>
+        <a asp-controller="@volverCtrl" asp-action="@volverAct" asp-route-id="@Model.PedidoId" class="btn-sm gris">Volver al pedido</a>
+    </div>
+
+    @if (puedeEnviar)
+    {
+        <form asp-controller="Pedidos" asp-action="EnviarTicket" asp-route-id="@Model.PedidoId" method="post" class="form-card ancho no-print" style="max-width:720px;margin:16px auto 0">
+            <div class="form-group" style="margin-bottom:8px">
+                <label>Enviar ticket por correo (vacío = tu correo de la cuenta)</label>
+                <input type="email" name="correo" maxlength="100" placeholder="otrocorreo@ejemplo.com" />
+            </div>
+            <button type="submit" class="btn-sm">Enviar ticket</button>
+        </form>
+    }
+</div>

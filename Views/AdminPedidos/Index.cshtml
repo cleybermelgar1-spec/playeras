@@ -1,0 +1,46 @@
+@model List<PlayerasJyC.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Admin: Pedidos";
+    string? estado = ViewBag.Estado;
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Pedidos / compras</h2>
+        <a asp-controller="Admin" asp-action="Index" class="btn-sm gris">Volver al panel</a>
+    </div>
+
+    <div class="acciones" style="margin-bottom:14px">
+        <a asp-action="Index" class="btn-sm @(string.IsNullOrEmpty(estado) ? "rosa" : "")">Todos</a>
+        @foreach (var e in Pedido.Estados)
+        {
+            <a asp-action="Index" asp-route-estado="@e" class="btn-sm @(estado == e ? "rosa" : "")">@e</a>
+        }
+    </div>
+
+    <div class="tabla-wrap">
+        <table class="tabla">
+            <thead><tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th class="num">Piezas</th><th class="num">Total</th><th>Pago</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td><b>@p.Folio</b></td>
+                    <td>@p.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@p.Usuario.Nombre</td>
+                    <td class="num">@p.Detalles.Sum(d => d.Cantidad)</td>
+                    <td class="num">$@p.Total.ToString("N2")</td>
+                    <td>@p.MetodoPago</td>
+                    <td><span class="estado @p.EstadoPedido">@p.EstadoPedido</span></td>
+                    <td><a asp-action="Detalle" asp-route-id="@p.PedidoId" class="btn-sm">Ver / atender</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="muted" style="margin-top:12px">No hay pedidos con ese filtro.</p>
+    }
+</div>

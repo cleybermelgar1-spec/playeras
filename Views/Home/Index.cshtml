@@ -1,0 +1,40 @@
+@model IEnumerable<PlayerasJyC.Models.Producto>
+
+@{
+    ViewData["Title"] = "Inicio";
+    var novedades = (List<Producto>)ViewBag.Novedades;
+}
+
+<section class="hero-banner">
+    <h1>Playeras J&amp;C</h1>
+    <p>Las mejores playeras personalizadas y de temporada. Streetwear con actitud.</p>
+    <a asp-controller="Productos" asp-action="Index" class="btn-action">Ver colección</a>
+    <a asp-controller="Home" asp-action="Contacto" class="btn-secondary" style="margin-left:10px">Cotiza la tuya</a>
+</section>
+
+<h2 class="section-title" id="ofertas">Ofertas destacadas</h2>
+<div class="cards-wrapper">
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var item in Model)
+        {
+            <partial name="_ProductoCard" model="item" />
+        }
+    }
+    else
+    {
+        <p class="muted">No hay ofertas disponibles por el momento.</p>
+    }
+</div>
+
+<h2 class="section-title">Novedades</h2>
+<div class="cards-wrapper">
+    @foreach (var item in novedades)
+    {
+        <partial name="_ProductoCard" model="item" />
+    }
+</div>
+
+<div class="catalog-link-box">
+    <a asp-controller="Productos" asp-action="Index" class="btn-secondary">Ver todo el catálogo</a>
+</div>

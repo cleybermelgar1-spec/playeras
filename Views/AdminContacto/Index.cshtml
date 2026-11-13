@@ -1,0 +1,42 @@
+@model List<PlayerasJyC.Models.SolicitudContacto>
+
+@{
+    ViewData["Title"] = "Admin: Cotizaciones";
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Solicitudes de cotización</h2>
+        <a asp-controller="Admin" asp-action="Index" class="btn-sm gris">Volver al panel</a>
+    </div>
+
+    <div class="tabla-wrap">
+        <table class="tabla">
+            <thead><tr><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Playera</th><th>Talla</th><th>Detalles</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@s.NombreCompleto</td>
+                    <td>@s.Email</td>
+                    <td>@s.PlayeraSolicitada</td>
+                    <td>@s.Talla</td>
+                    <td>@s.Detalles</td>
+                    <td><span class="estado @(s.Atendida ? "Entregado" : "Preparando")">@(s.Atendida ? "Atendida" : "Pendiente")</span></td>
+                    <td>
+                        <div class="acciones">
+                            <form asp-action="Alternar" asp-route-id="@s.SolicitudId" method="post"><button type="submit" class="btn-sm">@(s.Atendida ? "Marcar pendiente" : "Marcar atendida")</button></form>
+                            <form asp-action="Eliminar" asp-route-id="@s.SolicitudId" method="post" onsubmit="return confirm('¿Eliminar esta solicitud?');"><button type="submit" class="btn-sm rojo">Eliminar</button></form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="muted" style="margin-top:12px">No hay solicitudes todavía.</p>
+    }
+</div>

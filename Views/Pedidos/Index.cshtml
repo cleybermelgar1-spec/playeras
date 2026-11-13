@@ -1,0 +1,41 @@
+@model List<PlayerasJyC.Models.Pedido>
+
+@{
+    ViewData["Title"] = "Mis pedidos";
+}
+
+<div class="page">
+    <h2>Mis pedidos</h2>
+
+    @if (Model.Count == 0)
+    {
+        <p class="muted">Todavía no has hecho ninguna compra.</p>
+        <a asp-controller="Productos" asp-action="Index" class="btn-action" style="margin-top:12px">Ver la colección</a>
+    }
+    else
+    {
+        <div class="tabla-wrap">
+            <table class="tabla">
+                <thead><tr><th>Folio</th><th>Fecha</th><th>Piezas</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td><b>@p.Folio</b></td>
+                        <td>@p.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@p.Detalles.Sum(d => d.Cantidad)</td>
+                        <td>$@p.Total.ToString("N2")</td>
+                        <td><span class="estado @p.EstadoPedido">@p.EstadoPedido</span></td>
+                        <td>
+                            <div class="acciones">
+                                <a asp-action="Detalle" asp-route-id="@p.PedidoId" class="btn-sm">Ver detalle</a>
+                                <a asp-action="Ticket" asp-route-id="@p.PedidoId" class="btn-sm rosa">Ticket</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

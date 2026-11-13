@@ -1,0 +1,67 @@
+@model PlayerasJyC.Models.Pedido
+
+@{
+    ViewData["Title"] = "Pedido " + Model.Folio;
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Pedido @Model.Folio <span class="estado @Model.EstadoPedido">@Model.EstadoPedido</span></h2>
+        <div class="acciones">
+            <a asp-action="Ticket" asp-route-id="@Model.PedidoId" class="btn-sm rosa">Ver ticket</a>
+            <a asp-action="Index" class="btn-sm gris">Volver a mis pedidos</a>
+        </div>
+    </div>
+
+    <p class="muted">Realizado el @Model.FechaHora.ToString("dd/MM/yyyy HH:mm") · Pago: @Model.MetodoPago · Envío: @(Model.MetodoEnvio?.Nombre ?? "—")</p>
+    <p style="margin:8px 0"><b>Enviar a:</b> @Model.NombreDestinatario — @Model.DireccionEnvio, @Model.Ciudad C.P. @Model.CodigoPostal</p>
+
+    <div class="tabla-wrap" style="margin-top:14px">
+        <table class="tabla">
+            <thead><tr><th></th><th>Producto</th><th>Talla / Color</th><th class="num">Cant.</th><th class="num">Precio</th><th class="num">Importe</th></tr></thead>
+            <tbody>
+            @foreach (var d in Model.Detalles)
+            {
+                <tr>
+                    <td><img class="mini" src="@d.Producto.Imagen" alt="@d.NombreProducto" /></td>
+                    <td><a asp-controller="Productos" asp-action="Detalle" asp-route-id="@d.ProductoId">@d.NombreProducto</a></td>
+                    <td>@d.Talla / @d.Color</td>
+                    <td class="num">@d.Cantidad</td>
+                    <td class="num">$@d.PrecioUnitario.ToString("N2")</td>
+                    <td class="num">$@((d.Cantidad * d.PrecioUnitario).ToString("N2"))</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="resumen-box" style="max-width:360px;margin:16px 0 0 auto">
+        <div class="linea"><span>Subtotal</span><span>$@Model.Subtotal.ToString("N2")</span></div>
+        @if (Model.Descuento > 0)
+        {
+            <div class="linea"><span>Descuento @(Model.Cupon != null ? "(" + Model.Cupon.Codigo + ")" : "")</span><span>-$@Model.Descuento.ToString("N2")</span></div>
+        }
+        <div class="linea"><span>Envío</span><span>$@Model.CostosEnvio.ToString("N2")</span></div>
+        <div class="linea total"><span>Total</span><span>$@Model.Total.ToString("N2")</span></div>
+    </div>
+
+    <h3>Seguimiento</h3>
+    @foreach (var h in Model.Historial.OrderBy(x => x.Fecha))
+    {
+        <div class="resena">
+            <span class="estado @h.Estado">@h.Estado</span>
+            <small>@h.Fecha.ToString("dd/MM/yyyy HH:mm")</small>
+            @if (!string.IsNullOrWhiteSpace(h.Comentario))
+            {
+                <p>@h.Comentario</p>
+            }
+        </div>
+    }
+
+    @if (Model.EstadoPedido == "Pagado")
+    {
+        <form asp-action="Cancelar" asp-route-id="@Model.PedidoId" method="post" style="margin-top:18px" onsubmit="return confirm('¿Cancelar este pedido? Se reembolsará tu pago.');">
+            <button type="submit" class="btn-sm rojo">Cancelar pedido</button>
+        </form>
+    }
+</div>

@@ -1,0 +1,67 @@
+@model PlayerasJyC.Models.Cupon
+
+@{
+    bool esNuevo = Model.CuponId == 0;
+    ViewData["Title"] = (esNuevo ? "Nuevo: " : "Editar: ") + "cupón";
+}
+
+<div class="page">
+    <h2>@(esNuevo ? "Nuevo" : "Editar") cupón</h2>
+
+    <form asp-action="@(esNuevo ? "Crear" : "Editar")" asp-route-id="@Model.CuponId" method="post" class="form-card">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-msg err">
+                @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@e.ErrorMessage</div>
+                }
+            </div>
+        }
+        <input type="hidden" asp-for="CuponId" />
+        <div class="form-group">
+            <label>Código (ej. NEON10)</label>
+            <input asp-for="Codigo" maxlength="30" placeholder="" />
+        </div>
+        <div class="form-group">
+            <label>Descripción</label>
+            <input asp-for="Descripcion" maxlength="150" placeholder="" />
+        </div>
+        <div class="form-group">
+            <label>Tipo de descuento</label>
+            <select name="Tipo">
+                <option value="Porcentaje" selected="@(Model.Tipo == "Porcentaje")">Porcentaje</option>
+                <option value="Monto" selected="@(Model.Tipo == "Monto")">Monto</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Valor (% o $ según el tipo)</label>
+            <input asp-for="Valor" type="number" step="0.01" min="0" />
+        </div>
+        <div class="form-group">
+            <label>Compra mínima ($)</label>
+            <input asp-for="MinimoCompra" type="number" step="0.01" min="0" />
+        </div>
+        <div class="form-group">
+            <label>Válido desde</label>
+            <input type="date" name="FechaInicio" value="@Model.FechaInicio.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="form-group">
+            <label>Válido hasta</label>
+            <input type="date" name="FechaFin" value="@Model.FechaFin.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="form-group">
+            <label>Usos máximos (vacío = ilimitado)</label>
+            <input asp-for="UsosMaximos" type="number" step="1" min="1" />
+        </div>
+        <input type="hidden" asp-for="UsosActuales" />
+        <div class="form-group form-check">
+            <input asp-for="Activo" type="checkbox" /> <label>Activo</label>
+        </div>
+
+        <div class="acciones" style="margin-top:14px">
+            <button type="submit" class="btn-action">Guardar</button>
+            <a asp-action="Index" class="btn-sm gris">Cancelar</a>
+        </div>
+    </form>
+</div>

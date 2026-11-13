@@ -1,0 +1,43 @@
+@model PlayerasJyC.Models.MetodoEnvio
+
+@{
+    bool esNuevo = Model.MetodoEnvioId == 0;
+    ViewData["Title"] = (esNuevo ? "Nuevo: " : "Editar: ") + "método de envío";
+}
+
+<div class="page">
+    <h2>@(esNuevo ? "Nuevo" : "Editar") método de envío</h2>
+
+    <form asp-action="@(esNuevo ? "Crear" : "Editar")" asp-route-id="@Model.MetodoEnvioId" method="post" class="form-card">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-msg err">
+                @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@e.ErrorMessage</div>
+                }
+            </div>
+        }
+        <input type="hidden" asp-for="MetodoEnvioId" />
+        <div class="form-group">
+            <label>Nombre</label>
+            <input asp-for="Nombre" maxlength="60" placeholder="" />
+        </div>
+        <div class="form-group">
+            <label>Costo ($)</label>
+            <input asp-for="Costo" type="number" step="0.01" min="0" />
+        </div>
+        <div class="form-group">
+            <label>Días estimados de entrega</label>
+            <input asp-for="DiasEstimados" type="number" step="1" min="0" />
+        </div>
+        <div class="form-group form-check">
+            <input asp-for="Activo" type="checkbox" /> <label>Activo</label>
+        </div>
+
+        <div class="acciones" style="margin-top:14px">
+            <button type="submit" class="btn-action">Guardar</button>
+            <a asp-action="Index" class="btn-sm gris">Cancelar</a>
+        </div>
+    </form>
+</div>

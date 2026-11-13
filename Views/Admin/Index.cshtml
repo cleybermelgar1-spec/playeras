@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Panel de administración";
+}
+
+<div class="page">
+    <h2>Panel de administración</h2>
+
+    <div class="stat-grid">
+        <div class="stat"><b>$@(((decimal)ViewBag.Ventas).ToString("N2"))</b>Ventas totales</div>
+        <div class="stat"><b>@ViewBag.Pedidos</b>Pedidos (@ViewBag.PedidosPendientes por atender)</div>
+        <div class="stat"><b>@ViewBag.Clientes</b>Clientes</div>
+        <div class="stat"><b>@ViewBag.Productos</b>Productos activos</div>
+        <div class="stat"><b>@ViewBag.StockBajo</b>Variantes con stock bajo</div>
+        <div class="stat"><b>@ViewBag.SolicitudesNuevas</b>Cotizaciones nuevas</div>
+        <div class="stat"><b>@ViewBag.Resenas</b>Reseñas</div>
+    </div>
+
+    <h3>Estadísticas</h3>
+    <div class="charts-grid">
+        <div class="chart-box"><canvas id="gMes"></canvas></div>
+        <div class="chart-box"><canvas id="gEstado"></canvas></div>
+        <div class="chart-box"><canvas id="gTop"></canvas></div>
+        <div class="chart-box"><canvas id="gCategoria"></canvas></div>
+    </div>
+
+    <h3>Operación</h3>
+    <div class="panel-grid">
+        <a class="panel-card" asp-controller="AdminPedidos" asp-action="Index"><strong>Pedidos / compras</strong><span>Ver compras, cambiar estados y tickets</span></a>
+        <a class="panel-card" asp-controller="AdminResenas" asp-action="Index"><strong>Reseñas</strong><span>Moderar opiniones</span></a>
+        <a class="panel-card" asp-controller="AdminContacto" asp-action="Index"><strong>Cotizaciones</strong><span>Solicitudes de "Contáctanos"</span></a>
+    </div>
+
+    <h3>Catálogos</h3>
+    <div class="panel-grid">
+        <a class="panel-card" asp-controller="AdminProductos" asp-action="Index"><strong>Productos</strong><span>Alta, precios, stock e imágenes</span></a>
+        <a class="panel-card" asp-controller="AdminCategorias" asp-action="Index"><strong>Categorías</strong></a>
+        <a class="panel-card" asp-controller="AdminColecciones" asp-action="Index"><strong>Colecciones</strong></a>
+        <a class="panel-card" asp-controller="AdminTallas" asp-action="Index"><strong>Tallas</strong></a>
+        <a class="panel-card" asp-controller="AdminColores" asp-action="Index"><strong>Colores</strong></a>
+        <a class="panel-card" asp-controller="AdminCupones" asp-action="Index"><strong>Cupones</strong></a>
+        <a class="panel-card" asp-controller="AdminEnvios" asp-action="Index"><strong>Métodos de envío</strong></a>
+    </div>
+
+    <h3>Personas</h3>
+    <div class="panel-grid">
+        <a class="panel-card" asp-controller="AdminUsuarios" asp-action="Index"><strong>Usuarios</strong><span>Clientes y administradores</span></a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        var porMes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((object)ViewBag.VentasMes));
+        var porEstado = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((object)ViewBag.PorEstado));
+        var topProductos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((object)ViewBag.TopProductos));
+        var porCategoria = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((object)ViewBag.VentasCategoria));
+
+        var paleta = ['#ff007f', '#00f0ff', '#b79cff', '#ffcc00', '#3cdc78', '#ff6b35'];
+        Chart.defaults.color = '#b3b3cc';
+        Chart.defaults.borderColor = '#2a2a40';
+
+        function titulo(t) { return { display: true, text: t, color: '#ffffff', font: { size: 14 } }; }
+
+        new Chart(document.getElementById('gMes'), {
+            type: 'line',
+            data: { labels: porMes.map(function (x) { return x.nombre; }),
+                    datasets: [{ label: 'Ventas MXN', data: porMes.map(function (x) { return x.total; }), borderColor: '#00f0ff', backgroundColor: 'rgba(0,240,255,0.2)', fill: true, tension: 0.3 }] },
+            options: { plugins: { title: titulo('Ventas por mes') } }
+        });
+        new Chart(document.getElementById('gEstado'), {
+            type: 'doughnut',
+            data: { labels: porEstado.map(function (x) { return x.nombre; }),
+                    datasets: [{ data: porEstado.map(function (x) { return x.total; }), backgroundColor: paleta }] },
+            options: { plugins: { title: titulo('Pedidos por estado') } }
+        });
+        new Chart(document.getElementById('gTop'), {
+            type: 'bar',
+            data: { labels: topProductos.map(function (x) { return x.nombre; }),
+                    datasets: [{ label: 'Piezas vendidas', data: topProductos.map(function (x) { return x.total; }), backgroundColor: '#ff007f' }] },
+            options: { indexAxis: 'y', plugins: { title: titulo('Productos más vendidos') } }
+        });
+        new Chart(document.getElementById('gCategoria'), {
+            type: 'pie',
+            data: { labels: porCategoria.map(function (x) { return x.nombre; }),
+                    datasets: [{ data: porCategoria.map(function (x) { return x.total; }), backgroundColor: paleta }] },
+            options: { plugins: { title: titulo('Ventas por categoría (MXN)') } }
+        });
+    </script>
+}

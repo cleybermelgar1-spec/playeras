@@ -1,0 +1,46 @@
+@model List<PlayerasJyC.Models.ImagenProducto>
+
+@{
+    var p = (Producto)ViewBag.Producto;
+    ViewData["Title"] = "Imágenes";
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Imágenes: @p.Nombre</h2>
+        <div class="acciones">
+            <a asp-action="Variantes" asp-route-id="@p.ProductoId" class="btn-sm">Tallas y stock</a>
+            <a asp-action="Index" class="btn-sm gris">Volver a productos</a>
+        </div>
+    </div>
+
+    <p class="muted">Imagen principal actual:</p>
+    <img class="mini" style="width:110px;height:110px;margin:6px 0 16px" src="@p.Imagen" alt="Principal" />
+
+    <div class="panel-grid">
+        @foreach (var img in Model)
+        {
+            <div class="panel-card">
+                <img src="@img.Url" alt="Imagen @img.Orden" style="width:100%;height:160px;object-fit:contain;background:#0d0d12;border-radius:8px" />
+                <div class="acciones" style="margin-top:10px">
+                    <form asp-action="UsarComoPrincipal" asp-route-id="@img.ImagenProductoId" method="post"><button type="submit" class="btn-sm">Usar como principal</button></form>
+                    <form asp-action="EliminarImagen" asp-route-id="@img.ImagenProductoId" method="post" onsubmit="return confirm('¿Eliminar esta imagen?');"><button type="submit" class="btn-sm rojo">Eliminar</button></form>
+                </div>
+            </div>
+        }
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="muted">Aún no hay imágenes en la galería.</p>
+    }
+
+    <form asp-action="AgregarImagen" method="post" enctype="multipart/form-data" class="form-card ancho" style="margin-top:18px">
+        <h3 style="margin-top:0">Agregar imagen</h3>
+        <input type="hidden" name="productoId" value="@p.ProductoId" />
+        <div class="form-row">
+            <div class="form-group"><label>Subir archivo (JPG, PNG, WEBP o GIF, máx. 5 MB)</label><input type="file" name="archivo" accept=".jpg,.jpeg,.png,.webp,.gif" /></div>
+            <div class="form-group"><label>…o dirección de la imagen</label><input type="text" name="url" maxlength="300" placeholder="https://..." /></div>
+        </div>
+        <button type="submit" class="btn-sm rosa">Agregar imagen</button>
+    </form>
+</div>

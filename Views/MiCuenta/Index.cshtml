@@ -1,0 +1,92 @@
+@model PlayerasJyC.Models.MiCuentaVM
+
+@{
+    ViewData["Title"] = "Mi cuenta";
+}
+
+<div class="page">
+    <h2>Mi cuenta</h2>
+    <p class="muted">@Model.Usuario.Email · Cliente desde @Model.Usuario.FechaRegistro.ToString("dd/MM/yyyy")</p>
+
+    <div class="checkout-grid" style="margin-top:16px">
+        <form asp-action="GuardarPerfil" method="post" class="form-card ancho">
+            <h3 style="margin-top:0">Mis datos</h3>
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" name="nombre" maxlength="100" value="@Model.Usuario.Nombre" required />
+            </div>
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" name="telefono" maxlength="20" value="@Model.Usuario.Telefono" />
+            </div>
+            <button type="submit" class="btn-sm rosa">Guardar datos</button>
+        </form>
+
+        <form asp-action="CambiarPassword" method="post" class="form-card ancho">
+            <h3 style="margin-top:0">Cambiar contraseña</h3>
+            <div class="form-group">
+                <label>Contraseña actual</label>
+                <input type="password" name="actual" required />
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nueva</label>
+                    <input type="password" name="nueva" minlength="6" required />
+                </div>
+                <div class="form-group">
+                    <label>Confirmar</label>
+                    <input type="password" name="confirmar" minlength="6" required />
+                </div>
+            </div>
+            <button type="submit" class="btn-sm rosa">Cambiar contraseña</button>
+        </form>
+    </div>
+
+    <h3>Mis direcciones de envío</h3>
+    @if (Model.Direcciones.Count == 0)
+    {
+        <p class="muted">Aún no tienes direcciones guardadas.</p>
+    }
+    <div class="panel-grid">
+        @foreach (var d in Model.Direcciones)
+        {
+            <div class="panel-card">
+                <strong>@d.Alias @(d.Predeterminada ? Html.Raw("<span class=\"badge cian\">Principal</span>") : null)</strong>
+                <span>
+                    @d.NombreDestinatario<br />
+                    @d.Calle@(string.IsNullOrWhiteSpace(d.Colonia) ? "" : ", " + d.Colonia)<br />
+                    @d.Ciudad, @d.Estado · C.P. @d.CodigoPostal
+                </span>
+                <div class="acciones" style="margin-top:10px">
+                    @if (!d.Predeterminada)
+                    {
+                        <form asp-action="Predeterminada" asp-route-id="@d.DireccionId" method="post"><button class="btn-sm" type="submit">Hacer principal</button></form>
+                    }
+                    <form asp-action="EliminarDireccion" asp-route-id="@d.DireccionId" method="post" onsubmit="return confirm('¿Eliminar esta dirección?');"><button class="btn-sm rojo" type="submit">Eliminar</button></form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <form asp-action="AgregarDireccion" method="post" class="form-card ancho" style="margin-top:18px">
+        <h3 style="margin-top:0">Agregar dirección</h3>
+        <div class="form-row">
+            <div class="form-group"><label>Alias (Casa, Trabajo...)</label><input type="text" name="alias" maxlength="50" value="Casa" /></div>
+            <div class="form-group"><label>Nombre de quien recibe</label><input type="text" name="nombreDestinatario" maxlength="100" value="@Model.Usuario.Nombre" required /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Calle y número</label><input type="text" name="calle" maxlength="150" required /></div>
+            <div class="form-group"><label>Colonia</label><input type="text" name="colonia" maxlength="100" /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Ciudad</label><input type="text" name="ciudad" maxlength="100" required /></div>
+            <div class="form-group"><label>Estado</label><input type="text" name="estado" maxlength="100" required /></div>
+            <div class="form-group"><label>Código postal</label><input type="text" name="codigoPostal" maxlength="5" pattern="\d{5}" required /></div>
+            <div class="form-group"><label>Teléfono</label><input type="text" name="telefono" maxlength="20" value="@Model.Usuario.Telefono" /></div>
+        </div>
+        <div class="form-group form-check">
+            <input type="checkbox" name="predeterminada" value="true" /> <label>Usar como dirección principal</label>
+        </div>
+        <button type="submit" class="btn-sm rosa">Guardar dirección</button>
+    </form>
+</div>

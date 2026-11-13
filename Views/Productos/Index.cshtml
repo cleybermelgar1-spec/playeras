@@ -1,0 +1,64 @@
+@model List<PlayerasJyC.Models.Producto>
+
+@{
+    ViewData["Title"] = "Colección";
+    var categorias = (List<Categoria>)ViewBag.Categorias;
+    var colecciones = (List<Coleccion>)ViewBag.Colecciones;
+    int? catSel = ViewBag.CategoriaId;
+    int? colSel = ViewBag.ColeccionId;
+    string? q = ViewBag.Q;
+    string? orden = ViewBag.Orden;
+}
+
+<h2 class="section-title">Catálogo de playeras</h2>
+
+<form method="get" asp-action="Index" class="filtros">
+    <div class="form-group grow">
+        <label>Buscar</label>
+        <input type="text" name="q" value="@q" placeholder="Nombre o descripción" />
+    </div>
+    <div class="form-group">
+        <label>Categoría</label>
+        <select name="categoriaId">
+            <option value="">Todas</option>
+            @foreach (var c in categorias)
+            {
+                <option value="@c.CategoriaId" selected="@(catSel == c.CategoriaId)">@c.Nombre</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Colección</label>
+        <select name="coleccionId">
+            <option value="">Todas</option>
+            @foreach (var c in colecciones)
+            {
+                <option value="@c.ColeccionId" selected="@(colSel == c.ColeccionId)">@c.Nombre</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Ordenar por</label>
+        <select name="orden">
+            <option value="" selected="@(string.IsNullOrEmpty(orden))">Nombre</option>
+            <option value="nuevo" selected="@(orden == "nuevo")">Más nuevos</option>
+            <option value="precio_asc" selected="@(orden == "precio_asc")">Precio: menor a mayor</option>
+            <option value="precio_desc" selected="@(orden == "precio_desc")">Precio: mayor a menor</option>
+        </select>
+    </div>
+    <button type="submit" class="btn-action">Filtrar</button>
+</form>
+
+<div class="cards-wrapper">
+    @if (Model.Any())
+    {
+        @foreach (var item in Model)
+        {
+            <partial name="_ProductoCard" model="item" />
+        }
+    }
+    else
+    {
+        <p class="muted">No encontramos playeras con esos filtros.</p>
+    }
+</div>

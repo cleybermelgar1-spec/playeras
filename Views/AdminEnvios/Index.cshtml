@@ -1,0 +1,44 @@
+@model IEnumerable<PlayerasJyC.Models.MetodoEnvio>
+
+@{
+    ViewData["Title"] = "Admin: Métodos de envío";
+}
+
+<div class="page">
+    <div class="toolbar">
+        <h2>Métodos de envío</h2>
+        <div class="acciones">
+            <a asp-action="Crear" class="btn-sm rosa">+ Nuevo</a>
+            <a asp-controller="Admin" asp-action="Index" class="btn-sm gris">Volver al panel</a>
+        </div>
+    </div>
+
+    <div class="tabla-wrap">
+        <table class="tabla">
+            <thead><tr><th>Nombre</th><th>Costo</th><th>Días estimados</th><th>Activo</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>$@item.Costo.ToString("N2")</td>
+                    <td>@item.DiasEstimados</td>
+                    <td>@(item.Activo ? "Sí" : "No")</td>
+                    <td>
+                        <div class="acciones">
+                            <a asp-action="Editar" asp-route-id="@item.MetodoEnvioId" class="btn-sm">Editar</a>
+                            <form asp-action="Eliminar" asp-route-id="@item.MetodoEnvioId" method="post" onsubmit="return confirm('¿Eliminar este registro?');">
+                                <button type="submit" class="btn-sm rojo">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <p class="muted" style="margin-top:12px">Aún no hay registros. Usa el botón "+ Nuevo".</p>
+    }
+</div>

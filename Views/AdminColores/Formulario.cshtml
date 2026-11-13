@@ -1,0 +1,36 @@
+@model PlayerasJyC.Models.Color
+
+@{
+    bool esNuevo = Model.ColorId == 0;
+    ViewData["Title"] = (esNuevo ? "Nuevo: " : "Editar: ") + "color";
+}
+
+<div class="page">
+    <h2>@(esNuevo ? "Nuevo" : "Editar") color</h2>
+
+    <form asp-action="@(esNuevo ? "Crear" : "Editar")" asp-route-id="@Model.ColorId" method="post" class="form-card">
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert-msg err">
+                @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@e.ErrorMessage</div>
+                }
+            </div>
+        }
+        <input type="hidden" asp-for="ColorId" />
+        <div class="form-group">
+            <label>Nombre del color</label>
+            <input asp-for="Nombre" maxlength="40" placeholder="" />
+        </div>
+        <div class="form-group">
+            <label>Color</label>
+            <input asp-for="CodigoHex" type="color" style="height:44px;padding:4px" />
+        </div>
+
+        <div class="acciones" style="margin-top:14px">
+            <button type="submit" class="btn-action">Guardar</button>
+            <a asp-action="Index" class="btn-sm gris">Cancelar</a>
+        </div>
+    </form>
+</div>

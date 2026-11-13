@@ -1,0 +1,123 @@
+@model PlayerasJyC.Models.ProductoDetalleVM
+
+@{
+    var p = Model.Producto;
+    ViewData["Title"] = p.Nombre;
+    var imagenes = p.Imagenes.OrderBy(i => i.Orden).Select(i => i.Url).ToList();
+    if (!imagenes.Contains(p.Imagen)) { imagenes.Insert(0, p.Imagen); }
+    string Estrellas(int n) { return new string('★', n) + new string('☆', 5 - n); }
+}
+
+<div class="page">
+    <div class="detalle-grid">
+        <div class="galeria">
+            <img id="imgPrincipal" class="principal" src="@p.Imagen" alt="@p.Nombre" />
+            @if (imagenes.Count > 1)
+            {
+                <div class="miniaturas">
+                    @foreach (var url in imagenes)
+                    {
+                        <img src="@url" alt="Vista de @p.Nombre" onclick="document.getElementById('imgPrincipal').src = this.src" />
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="detalle-info">
+            <div class="cat-chip">@(p.Categoria?.Nombre)@(p.Coleccion != null ? " · " + p.Coleccion.Nombre : "")</div>
+            <h1>@p.Nombre</h1>
+
+            <div>
+                <span class="estrellas">@Estrellas((int)Math.Round(Model.Promedio))</span>
+                <small class="muted">@(Model.Resenas.Count == 0 ? "Sin reseñas" : Model.Promedio.ToString("0.0") + " (" + Model.Resenas.Count + " reseñas)")</small>
+            </div>
+
+            <p style="margin:12px 0">
+                @if (p.EnOferta && p.PrecioOferta.HasValue)
+                {
+                    <span class="price-old">$@p.PrecioOriginal.ToString("N2")</span>
+                    <span class="badge">Oferta</span><br />
+                }
+                <span class="precio-grande">$@p.PrecioActual.ToString("N2")</span> <small class="muted">MXN</small>
+            </p>
+
+            <p class="muted">@p.Descripcion</p>
+            @if (!string.IsNullOrWhiteSpace(p.Material))
+            {
+                <p style="margin-top:8px"><b>Material:</b> @p.Material</p>
+            }
+
+            <div style="margin-top:18px">
+                @if (Model.Variantes.Count == 0)
+                {
+                    <p class="stock-out">Producto agotado por el momento.</p>
+                }
+                else if (Model.EsCliente)
+                {
+                    <form asp-controller="Carrito" asp-action="Agregar" method="post" class="form-card" style="padding:16px">
+                        <div class="form-group">
+                            <label>Talla y color</label>
+                            <select name="varianteId" required>
+                                @foreach (var v in Model.Variantes)
+                                {
+                                    <option value="@v.VarianteId">Talla @v.Talla.Nombre — @v.Color.Nombre (@v.Stock disponibles)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad</label>
+                            <input type="number" name="cantidad" value="1" min="1" max="20" />
+                        </div>
+                        <button type="submit" class="btn-action btn-block">Agregar al carrito</button>
+                    </form>
+                }
+                else if (Context.Session.GetString("Rol") == "Admin")
+                {
+                    <p class="muted">Estás con una cuenta de administrador: las compras son solo para clientes.</p>
+                }
+                else
+                {
+                    <a asp-controller="Cuenta" asp-action="Ingresar" asp-route-regresarA="@(Context.Request.Path + Context.Request.QueryString)" class="btn-action">Inicia sesión para comprar</a>
+                    <p class="muted" style="margin-top:8px">¿No tienes cuenta? <a asp-controller="Cuenta" asp-action="Registro">Regístrate gratis</a></p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <h3>Reseñas</h3>
+    @if (Model.EsCliente)
+    {
+        <form asp-controller="Resenas" asp-action="Guardar" method="post" class="form-card" style="padding:16px;margin-bottom:16px">
+            <input type="hidden" name="productoId" value="@p.ProductoId" />
+            <div class="form-group">
+                <label>@(Model.MiResena == null ? "Deja tu reseña" : "Actualiza tu reseña")</label>
+                <select name="calificacion">
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <option value="@i" selected="@(Model.MiResena != null ? Model.MiResena.Calificacion == i : i == 5)">@Estrellas(i)</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <textarea name="comentario" maxlength="500" placeholder="Cuéntanos qué te pareció">@(Model.MiResena?.Comentario)</textarea>
+            </div>
+            <button type="submit" class="btn-sm rosa">Guardar reseña</button>
+        </form>
+    }
+
+    @if (Model.Resenas.Count == 0)
+    {
+        <p class="muted">Todavía no hay reseñas para este producto.</p>
+    }
+    @foreach (var r in Model.Resenas)
+    {
+        <div class="resena">
+            <span class="estrellas">@Estrellas(r.Calificacion)</span>
+            <b>@r.Usuario.Nombre</b> <small>@r.Fecha.ToString("dd/MM/yyyy")</small>
+            @if (!string.IsNullOrWhiteSpace(r.Comentario))
+            {
+                <p>@r.Comentario</p>
+            }
+        </div>
+    }
+</div>

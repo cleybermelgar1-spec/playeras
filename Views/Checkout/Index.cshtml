@@ -1,0 +1,140 @@
+@model PlayerasJyC.Models.CheckoutVM
+
+@{
+    ViewData["Title"] = "Finalizar compra";
+    var pre = Model.Prefill;
+    decimal baseTotal = Model.Subtotal - Model.Descuento;
+}
+
+<div class="page">
+    <h2>Finalizar compra</h2>
+
+    <div class="checkout-grid">
+        <!-- Datos de envío y pago -->
+        <form asp-action="Confirmar" method="post" class="form-card ancho">
+            <input type="hidden" name="cupon" value="@(Model.CuponValido ? Model.CuponCodigo : "")" />
+
+            <h3 style="margin-top:0">1. Datos de envío</h3>
+            @if (Model.Direcciones.Count > 0)
+            {
+                <div class="form-group">
+                    <label>Usar una dirección guardada</label>
+                    <select id="selDireccion">
+                        @foreach (var d in Model.Direcciones)
+                        {
+                            <option value="@d.DireccionId"
+                                    data-nombre="@d.NombreDestinatario" data-calle="@d.Calle" data-colonia="@d.Colonia"
+                                    data-ciudad="@d.Ciudad" data-estado="@d.Estado" data-cp="@d.CodigoPostal" data-tel="@d.Telefono">@d.Alias — @d.Calle</option>
+                        }
+                        <option value="0">Escribir otra dirección</option>
+                    </select>
+                </div>
+            }
+            <div class="form-row">
+                <div class="form-group"><label>Nombre de quien recibe</label><input type="text" id="fNombre" name="nombreDestinatario" maxlength="100" value="@(pre?.NombreDestinatario ?? Model.NombreUsuario)" required /></div>
+                <div class="form-group"><label>Teléfono</label><input type="text" id="fTel" name="telefono" maxlength="20" value="@(pre?.Telefono ?? Model.TelefonoUsuario)" /></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Calle y número</label><input type="text" id="fCalle" name="calle" maxlength="150" value="@(pre?.Calle)" required /></div>
+                <div class="form-group"><label>Colonia</label><input type="text" id="fColonia" name="colonia" maxlength="100" value="@(pre?.Colonia)" /></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Ciudad</label><input type="text" id="fCiudad" name="ciudad" maxlength="100" value="@(pre?.Ciudad)" required /></div>
+                <div class="form-group"><label>Estado</label><input type="text" id="fEstado" name="estado" maxlength="100" value="@(pre?.Estado)" required /></div>
+                <div class="form-group"><label>Código postal</label><input type="text" id="fCp" name="codigoPostal" maxlength="5" pattern="\d{5}" value="@(pre?.CodigoPostal)" required /></div>
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" name="guardarDireccion" value="true" /> <label>Guardar esta dirección en mi cuenta</label>
+            </div>
+
+            <h3>2. Método de envío</h3>
+            <div class="form-group">
+                <select name="metodoEnvioId" id="selEnvio" required>
+                    @foreach (var e in Model.Envios)
+                    {
+                        <option value="@e.MetodoEnvioId" data-costo="@e.Costo.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">@e.Nombre — $@e.Costo.ToString("N2") (@e.DiasEstimados día(s))</option>
+                    }
+                </select>
+            </div>
+
+            <h3>3. Método de pago</h3>
+            <div class="form-group">
+                <select name="metodoPago" required>
+                    <option value="Tarjeta">Tarjeta de crédito / débito</option>
+                    <option value="Transferencia">Transferencia bancaria</option>
+                    <option value="Depósito OXXO">Depósito en OXXO</option>
+                </select>
+                <small class="muted">Pago simulado para fines del proyecto escolar.</small>
+            </div>
+
+            <button type="submit" class="btn-action btn-block">Confirmar y pagar</button>
+        </form>
+
+        <!-- Resumen y cupón -->
+        <div>
+            <div class="resumen-box">
+                <h3 style="margin-top:0">Tu pedido</h3>
+                @foreach (var it in Model.Items)
+                {
+                    <div class="linea">
+                        <span>@it.Cantidad × @it.Variante.Producto.Nombre <small>(@it.Variante.Talla.Nombre / @it.Variante.Color.Nombre)</small></span>
+                        <span>$@((it.Cantidad * it.Variante.Producto.PrecioActual).ToString("N2"))</span>
+                    </div>
+                }
+                <div class="linea"><span>Subtotal</span><span>$@Model.Subtotal.ToString("N2")</span></div>
+                @if (Model.Descuento > 0)
+                {
+                    <div class="linea"><span>Descuento (@Model.CuponCodigo)</span><span>-$@Model.Descuento.ToString("N2")</span></div>
+                }
+                <div class="linea"><span>Envío</span><span id="txtEnvio">$0.00</span></div>
+                <div class="linea total"><span>Total</span><span id="txtTotal">$@baseTotal.ToString("N2")</span></div>
+            </div>
+
+            <form asp-action="Index" method="get" class="form-card ancho" style="margin-top:16px">
+                <div class="form-group" style="margin-bottom:8px">
+                    <label>¿Tienes un cupón?</label>
+                    <input type="text" name="cupon" value="@Model.CuponCodigo" maxlength="30" placeholder="Ej. BIENVENIDO10" />
+                </div>
+                <button type="submit" class="btn-sm">Aplicar cupón</button>
+                @if (Model.CuponMensaje != null)
+                {
+                    <p class="@(Model.CuponValido ? "" : "stock-out")" style="margin-top:8px;@(Model.CuponValido ? "color:#00f0ff" : "")">@Model.CuponMensaje</p>
+                }
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var base = @(baseTotal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+            var selEnvio = document.getElementById('selEnvio');
+            function dinero(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+            function actualizar() {
+                var costo = 0;
+                if (selEnvio && selEnvio.selectedOptions.length) {
+                    costo = parseFloat(selEnvio.selectedOptions[0].getAttribute('data-costo')) || 0;
+                }
+                document.getElementById('txtEnvio').textContent = dinero(costo);
+                document.getElementById('txtTotal').textContent = dinero(base + costo);
+            }
+            if (selEnvio) { selEnvio.addEventListener('change', actualizar); actualizar(); }
+
+            var selDir = document.getElementById('selDireccion');
+            if (selDir) {
+                selDir.addEventListener('change', function () {
+                    var o = selDir.selectedOptions[0];
+                    if (o.value === '0') { return; }
+                    document.getElementById('fNombre').value = o.getAttribute('data-nombre') || '';
+                    document.getElementById('fCalle').value = o.getAttribute('data-calle') || '';
+                    document.getElementById('fColonia').value = o.getAttribute('data-colonia') || '';
+                    document.getElementById('fCiudad').value = o.getAttribute('data-ciudad') || '';
+                    document.getElementById('fEstado').value = o.getAttribute('data-estado') || '';
+                    document.getElementById('fCp').value = o.getAttribute('data-cp') || '';
+                    document.getElementById('fTel').value = o.getAttribute('data-tel') || '';
+                });
+            }
+        })();
+    </script>
+}
